@@ -74,11 +74,21 @@ def install() -> None:
     # comfy_proxy.py`'s HTTP endpoint directly with the CORRECT single-`/proxy/` path (i.e.
     # simulating what a node WOULD send), never by actually running a real ComfyUI process
     # with this override installed end-to-end — so this defect went uncaught until now.
-    args.comfy_api_base = f"{_proxy_root()}/comfy/{key}"
+    # `VideoRouter.ProviderPolicy` (`js/videorouter_settings.js`) rides in the URL as an
+    # EXTRA path segment, same reasoning as the API key itself: Comfy's own client code only
+    # ever attaches its own comfy.org auth headers, never a hook for a third-party pack to
+    # inject anything else, so the base URL is the only channel available at all. Read once
+    # here (not re-read per request — `args.comfy_api_base` is set once at pack import), so
+    # changing this setting needs a ComfyUI restart to take effect, same as the API key.
+    # Server-side (`gateway/comfy_proxy.py`) has a SEPARATE route for this `{policy}`-bearing
+    # shape — omitting the segment entirely (no preference set) keeps using the original
+    # plain `.../comfy/{key}/...` shape unchanged, so this is purely additive.
+    policy = client.settings_provider_policy()
+    args.comfy_api_base = f"{_proxy_root()}/comfy/{key}/{policy}" if policy else f"{_proxy_root()}/comfy/{key}"
     logging.info(
         "VideoRouter: redirecting ComfyUI's official Kling and MiniMax Partner Nodes to "
         "bill through your videorouter.sh account instead of comfy.org "
-        "(comfy_api_base=%s/comfy/<key>). Every other Partner Node is unaffected — "
+        "(comfy_api_base=%s/comfy/<key>%s). Every other Partner Node is unaffected — "
         "still relayed transparently to the real api.comfy.org.",
-        _proxy_root(),
+        _proxy_root(), f"/{policy}" if policy else "",
     )

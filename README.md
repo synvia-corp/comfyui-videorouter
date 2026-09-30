@@ -45,6 +45,29 @@ Set your API key once — every node picks it up automatically. Checked in this 
 
 Get a key at [videorouter.sh/keys](https://videorouter.sh/keys).
 
+## Provider selection strategy
+
+**ComfyUI Settings → VideoRouter → Routing → Provider Selection Strategy** picks which host
+videorouter.sh routes a relayed Partner Node request to, among the confirmed-identical hosts
+for that model — the same 4 strategies ComfyUI itself uses for local hardware routing,
+applied here to the hosted providers instead:
+
+- **Platform default (cheapest first)** — no preference set, the platform's own default.
+- **Lowest cost**
+- **Fastest finish** — lowest measured end-to-end generation latency.
+- **Most reliable** — highest measured success rate.
+- **Fastest start** — lowest measured queue time before generation begins.
+
+This is a single global setting, not a per-node control — none of the official Partner Node
+schemas this pack relays have a host-selection input of their own to attach one to. Takes
+effect on ComfyUI's next restart (read once at pack load, same as the API key).
+
+**Known limitation**: the price/host shown in a relayed official node's own UI (its price
+badge, its `mode`/model dropdown) is still that node's original comfy.org-authored estimate —
+this pack has no way to rewrite another pack's node schema. What you're actually billed
+follows your videorouter.sh account's real pricing and the strategy above, not the number
+displayed in the node.
+
 ## Nodes
 
 | Node | Maps to |

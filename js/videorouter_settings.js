@@ -35,5 +35,34 @@ app.registerExtension({
             tooltip: "Your videorouter.sh key (llmr_sk_...). Get one at "
                     + "https://videorouter.sh/keys.",
         },
+        {
+            // Applies to EVERY relayed Partner Node request (Kling/MiniMax/Veo/Meshy/...)
+            // — a single global preference, not a per-node widget, since none of the
+            // official nodes this pack relays have any host-selection input of their own to
+            // hang a per-instance control on (`gateway/comfy_proxy.py`'s own docstring: the
+            // official node schemas are owned by Comfy-Org, not this pack). Read server-side
+            // at import time by `comfy_relay.py::install()` (same settings-file-on-disk
+            // mechanism as the API key above) and threaded through on every proxied request
+            // as `POST /v1/videos|images|meshes`'s own `provider.policy` field
+            // (`docs/DESIGN-provider-routing-policies.md` in the main repo) — this pack adds
+            // no new routing logic of its own, it only exposes a UI for logic the platform
+            // already has.
+            id: "VideoRouter.ProviderPolicy",
+            name: "Provider Selection Strategy",
+            category: ["VideoRouter", "Routing", "Provider Strategy"],
+            type: "combo",
+            options: [
+                { value: "", text: "Platform default (cheapest first)" },
+                { value: "lowest_cost", text: "Lowest cost" },
+                { value: "fast_finish", text: "Fastest finish (lowest measured latency)" },
+                { value: "most_reliable", text: "Most reliable (highest measured success rate)" },
+                { value: "fast_start", text: "Fastest start (lowest measured queue time)" },
+            ],
+            defaultValue: "",
+            tooltip: "Which host videorouter.sh picks among the confirmed-identical hosts "
+                    + "for a model — same 4 strategies as ComfyUI's own local hardware "
+                    + "routing, applied to the hosted providers this pack relays to instead. "
+                    + "Requires restarting ComfyUI to take effect (read once at pack load).",
+        },
     ],
 });
