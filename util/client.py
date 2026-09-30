@@ -16,7 +16,7 @@ from typing import Any, Optional
 
 import aiohttp
 
-DEFAULT_BASE_URL = "https://api.videorouter.sh/v1"
+DEFAULT_BASE_URL = "https://videorouter.sh/v1"
 
 
 class ApiError(Exception):
@@ -101,18 +101,19 @@ def settings_provider_policy() -> str:
     return policy if policy in _VALID_PROVIDER_POLICIES else "lowest_cost"
 
 
-def resolve_api_key(widget_value: Optional[str]) -> str:
-    """Precedence: a node's own `api_key` widget (explicit per-node override) > the
-    VideoRouter Settings-panel entry (set once, applies to every node — the recommended
-    path). No environment-variable fallback (removed 2026-09-14, per product decision) —
-    one clear source of truth, not several silently-stacked ones; a missing key is a clean
+def resolve_api_key() -> str:
+    """Reads the VideoRouter Settings-panel entry (`Settings > VideoRouter > Auth > API
+    Key`) — the only source of truth. No per-node widget override and no
+    environment-variable fallback (both removed 2026-09-14/2026-09-29, per product
+    decision) — one clear place to set it, not several silently-stacked ones that also
+    each risk landing a raw key in a shared `workflow.json`; a missing key is a clean
     error, not a guess about which of multiple places it might be set."""
-    key = (widget_value or "").strip() or _settings_api_key()
+    key = _settings_api_key()
     if not key:
         raise ApiError(401, {"error": {
             "message": "No VideoRouter API key configured. Set one in ComfyUI's Settings "
-                       "> VideoRouter > Auth > API Key (recommended) or fill in this "
-                       "node's api_key widget. Get a key at https://videorouter.sh/keys.",
+                       "> VideoRouter > Auth > API Key. Get a key at "
+                       "https://videorouter.sh/keys.",
             "type": "authentication_error",
         }})
     return key

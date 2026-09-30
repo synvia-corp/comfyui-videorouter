@@ -14,12 +14,10 @@ from comfy_api.latest import ComfyExtension
 from . import comfy_relay, price_patch
 from .nodes import server_routes  # noqa: F401 - side effect: registers this pack's HTTP route
 from .nodes.image import VideoRouterImageEdit, VideoRouterImageGenerate
-from .nodes.models import VideoRouterModelPicker
 
 _NODES = [
     VideoRouterImageGenerate,
     VideoRouterImageEdit,
-    VideoRouterModelPicker,
 ]
 
 # Loaded independently of the V3 node-registration path above — ComfyUI's frontend scans

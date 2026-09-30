@@ -11,8 +11,10 @@ layout, no desktop-specific fork.
 
 Two independent pieces, both enabled just by installing this pack:
 
-1. **Its own nodes** (`VideoRouter Image Generate` / `Image Edit` / `Model Picker`) — text-to-image
-   and image-to-image via videorouter.sh's `/v1/images`.
+1. **Its own nodes** (`VideoRouter Image Generate` / `Image Edit`) — text-to-image and
+   image-to-image via videorouter.sh's `/v1/images`. Each node's own `model` field is a
+   live-refreshing dropdown over the real catalog (`GET /v1/images/models`) — no separate
+   picker node needed.
 2. **A Partner Node relay** — redirects ComfyUI's own **official** Partner API Nodes (Kling,
    MiniMax, BFL, Veo, and 20+ more — the ones that normally bill through a comfy.org account)
    to bill through your videorouter.sh account instead. No changes to those nodes, no
@@ -34,14 +36,10 @@ ComfyUI.
 
 ## Auth
 
-Set your API key once — every node picks it up automatically. Checked in this order:
-
-1. **ComfyUI Settings → VideoRouter → Auth → API Key** (recommended). Saved server-side by
-   ComfyUI itself, never into a shared `workflow.json`.
-2. A node's own `api_key` widget — a per-node override. Avoid this for anything you'll
-   share: ComfyUI has no masked/password input type, and a widget value gets saved into
-   `workflow.json` — a live key in a workflow file pasted into a forum/Discord is a real
-   credential leak.
+Set your API key once, in **ComfyUI Settings → VideoRouter → Auth → API Key** — every
+node picks it up automatically. Saved server-side by ComfyUI itself, never into a shared
+`workflow.json`. There's no per-node `api_key` widget to fill in on individual nodes —
+this is the only place it's set, so a shared workflow file never carries a live key.
 
 Get a key at [videorouter.sh/keys](https://videorouter.sh/keys).
 
@@ -69,7 +67,7 @@ install time to compute this platform's own real price instead of comfy.org's ha
 credit estimate (see `price_patch.py`; no frontend fork required for the *number* itself to
 be correct). By default it's still shown in comfy.org's own "credits" unit, since that
 conversion is baked into the stock ComfyUI frontend — installing the optional
-[videorouter-fork ComfyUI frontend](https://github.com/Franklin-Yao/comfyui_frontend_fork)
+[videorouter-fork ComfyUI frontend](https://github.com/synvia-corp/comfyui_frontend_fork)
 (built separately, launched with `--front-end-root`) instead makes these 3 badges show a
 real `$` amount directly. Every OTHER relayed node (23+ providers) still shows comfy.org's
 own original estimate — this pack has no way to rewrite another node's schema at all unless
@@ -81,9 +79,8 @@ displayed in the node.
 
 | Node | Maps to |
 |---|---|
-| VideoRouter Image Generate | `POST /v1/images` (text-to-image) |
-| VideoRouter Image Edit | `POST /v1/images` (image-to-image) |
-| VideoRouter Model Picker | live combo widget over `GET /v1/images/models` |
+| VideoRouter Image Generate | `POST /v1/images` (text-to-image); `model` is a live combo over `GET /v1/images/models` |
+| VideoRouter Image Edit | `POST /v1/images` (image-to-image); same live `model` combo |
 
 ## Partner Node relay coverage
 
@@ -141,9 +138,8 @@ the node's dropdown.
 ## Security
 
 Never let your API key land in a shareable `workflow.json` — workflow files get pasted into
-Discord/Civitai routinely, and a leaked `llmr_sk_...` key is a live-credits leak. Use the
-Settings-panel auth path above, not a node's own `api_key` widget, for anything you plan to
-share.
+Discord/Civitai routinely, and a leaked `llmr_sk_...` key is a live-credits leak. The
+Settings-panel auth path above is the only way to set it precisely so this can't happen.
 
 ## License
 

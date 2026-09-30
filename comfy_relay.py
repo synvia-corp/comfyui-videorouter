@@ -22,8 +22,8 @@ _COMFY_ORG_DEFAULT = "https://api.comfy.org"
 
 def _proxy_root() -> str:
     """`util.client.base_url()` is our OWN `/v1`-suffixed API base
-    (`https://api.videorouter.sh/v1` by default) — this proxy lives at the bare root
-    (`https://api.videorouter.sh/comfy/...`), a sibling of `/v1`, not under it."""
+    (`https://videorouter.sh/v1` by default) — this proxy lives at the bare root
+    (`https://videorouter.sh/comfy/...`), a sibling of `/v1`, not under it."""
     root = client.base_url()
     if root.endswith("/v1"):
         root = root[: -len("/v1")]
@@ -48,7 +48,7 @@ def install() -> None:
         return
 
     try:
-        key = client.resolve_api_key(None)
+        key = client.resolve_api_key()
     except client.ApiError:
         logging.info(
             "VideoRouter: no API key configured yet (Settings > VideoRouter > Auth > API "

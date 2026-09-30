@@ -1,6 +1,7 @@
 """Registers this pack's HTTP route(s) on ComfyUI's own server (`PromptServer.instance.routes`
-— confirmed pattern, matches ComfyUI's own `custom_nodes/example_node.py.example`), so the
-`VideoRouter Model Picker` node's live combo (`nodes/models.py`) has something to poll.
+— confirmed pattern, matches ComfyUI's own `custom_nodes/example_node.py.example`), so
+`VideoRouterImageGenerate`/`-Edit`'s own live `model` combo (`nodes/image.py`) has something
+to poll — inline on each node, no separate model-picker node needed.
 
 Runs server-side, in the same process every node's `execute` already runs in — so it
 resolves the key the same way every node does (`util.client.resolve_api_key`: Settings
@@ -28,7 +29,7 @@ IMAGE_MODELS_ROUTE = "/videorouter/image_models"
 @PromptServer.instance.routes.get(IMAGE_MODELS_ROUTE)
 async def _get_image_models(request: web.Request) -> web.Response:
     try:
-        key = client.resolve_api_key(None)
+        key = client.resolve_api_key()
         models = await client.list_image_models(key)
     except Exception as exc:
         # Deliberately broad: a network failure (DNS, timeout, connection refused — none of

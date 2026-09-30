@@ -3,10 +3,11 @@
 // javascript_settings, 2026-09-14. Saving here calls ComfyUI's existing generic
 // `POST /settings/{id}` route (app/app_settings.py), which persists to
 // `user/default/comfy.settings.json` server-side — NOT into workflow.json, so it isn't
-// exposed if a user shares a workflow file (unlike the per-node `api_key` widget, which
-// stays as a lower-precedence manual override — see util/client.py's `resolve_api_key`).
-// No `LLMROUTER_API_KEY` environment-variable fallback (removed 2026-09-14) — Settings or
-// the per-node widget, one clear source of truth, not several silently-stacked ones.
+// exposed if a user shares a workflow file. This is now the ONLY place the key is set —
+// no per-node `api_key` widget (removed 2026-09-29, the same workflow.json-leak risk this
+// comment used to carve out as a knowing exception) and no `LLMROUTER_API_KEY`
+// environment-variable fallback (removed 2026-09-14) — see util/client.py's
+// `resolve_api_key`.
 //
 // No masked/password input type exists in ComfyUI's settings schema as of this writing
 // (confirmed: the full `type` list is boolean/text/number/slider/combo/color/image/hidden,

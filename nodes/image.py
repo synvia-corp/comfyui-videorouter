@@ -17,13 +17,16 @@ from __future__ import annotations
 from comfy_api.latest import io
 
 from ..util import client, media_bridge
+from .server_routes import IMAGE_MODELS_ROUTE
 
-# The server accepts 'auto' and picks its own default when a model isn't pinned (matches
-# the CLI's own "omit --model unless the user names one" guidance) — offered as the
-# combo's default entry so the node is usable before the live catalog loads (see
-# VideoRouterModelPicker in nodes/models.py for the dynamic, live-catalog version of this
-# same choice).
-_DEFAULT_MODEL_OPTIONS = ["auto"]
+# Same live-refreshing combo mechanism the (now-removed) standalone VideoRouterModelPicker
+# used — `Combo.Input(remote=io.RemoteOptions(...))` polls `IMAGE_MODELS_ROUTE`
+# (`GET /v1/images/models`, proxied server-side by `server_routes.py`) and repopulates the
+# dropdown in place, so there's no separate node just to browse the catalog.
+_MODEL_COMBO_KWARGS = dict(
+    options=["auto"], default="auto",
+    remote=io.RemoteOptions(route=IMAGE_MODELS_ROUTE, refresh_button=True),
+)
 
 
 class VideoRouterImageGenerate(io.ComfyNode):
@@ -37,11 +40,10 @@ class VideoRouterImageGenerate(io.ComfyNode):
                         "to your LLMROUTER_API_KEY credits).",
             inputs=[
                 io.String.Input("prompt", multiline=True),
-                io.Combo.Input("model", options=_DEFAULT_MODEL_OPTIONS, default="auto"),
+                io.Combo.Input("model", **_MODEL_COMBO_KWARGS),
                 io.Int.Input("n", default=1, min=1, max=4),
                 io.String.Input("aspect_ratio", optional=True, default=""),
                 io.String.Input("resolution", optional=True, default=""),
-                io.String.Input("api_key", optional=True, default=""),
             ],
             outputs=[
                 io.Image.Output(),
@@ -51,8 +53,8 @@ class VideoRouterImageGenerate(io.ComfyNode):
 
     @classmethod
     async def execute(cls, prompt: str, model: str, n: int, aspect_ratio: str,
-                       resolution: str, api_key: str) -> io.NodeOutput:
-        key = client.resolve_api_key(api_key)
+                       resolution: str) -> io.NodeOutput:
+        key = client.resolve_api_key()
         payload: dict = {"model": model, "prompt": prompt, "n": n}
         if aspect_ratio:
             payload["aspect_ratio"] = aspect_ratio
@@ -71,15 +73,14 @@ class VideoRouterImageEdit(io.ComfyNode):
             display_name="VideoRouter Image Edit",
             category="VideoRouter/Image",
             description="Image-to-image edit via videorouter.sh — requires an "
-                        "edit-capable model (see the VideoRouter Model Picker node).",
+                        "edit-capable model.",
             inputs=[
                 io.Image.Input("image"),
                 io.String.Input("prompt", multiline=True),
-                io.Combo.Input("model", options=_DEFAULT_MODEL_OPTIONS, default="auto"),
+                io.Combo.Input("model", **_MODEL_COMBO_KWARGS),
                 io.Int.Input("n", default=1, min=1, max=4),
                 io.String.Input("aspect_ratio", optional=True, default=""),
                 io.String.Input("resolution", optional=True, default=""),
-                io.String.Input("api_key", optional=True, default=""),
             ],
             outputs=[
                 io.Image.Output(),
@@ -89,8 +90,8 @@ class VideoRouterImageEdit(io.ComfyNode):
 
     @classmethod
     async def execute(cls, image, prompt: str, model: str, n: int, aspect_ratio: str,
-                       resolution: str, api_key: str) -> io.NodeOutput:
-        key = client.resolve_api_key(api_key)
+                       resolution: str) -> io.NodeOutput:
+        key = client.resolve_api_key()
         png_bytes = media_bridge.tensor_to_png_bytes(image)
         ref_url = await client.upload_bytes(key, png_bytes, "input.png", "image/png")
         # `input_references` (gateway/server/images.py) — array of `{"image_url": {"url": ...}}`,
