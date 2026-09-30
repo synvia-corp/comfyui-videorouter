@@ -52,13 +52,16 @@ app.registerExtension({
             category: ["VideoRouter", "Routing", "Provider Strategy"],
             type: "combo",
             options: [
-                { value: "", text: "Platform default (cheapest first)" },
                 { value: "lowest_cost", text: "Lowest cost" },
                 { value: "fast_finish", text: "Fastest finish (lowest measured latency)" },
                 { value: "most_reliable", text: "Most reliable (highest measured success rate)" },
                 { value: "fast_start", text: "Fastest start (lowest measured queue time)" },
             ],
-            defaultValue: "",
+            // "Lowest cost" is also the platform's own unconditional default whenever no
+            // policy is sent at all (`docs/DESIGN-provider-routing-policies.md` §5) — making
+            // it the explicit default here too means this widget never shows an ambiguous
+            // "platform default" placeholder, just the real behavior a fresh install gets.
+            defaultValue: "lowest_cost",
             tooltip: "Which host videorouter.sh picks among the confirmed-identical hosts "
                     + "for a model — same 4 strategies as ComfyUI's own local hardware "
                     + "routing, applied to the hosted providers this pack relays to instead. "

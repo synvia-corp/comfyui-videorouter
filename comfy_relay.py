@@ -81,8 +81,11 @@ def install() -> None:
     # here (not re-read per request — `args.comfy_api_base` is set once at pack import), so
     # changing this setting needs a ComfyUI restart to take effect, same as the API key.
     # Server-side (`gateway/comfy_proxy.py`) has a SEPARATE route for this `{policy}`-bearing
-    # shape — omitting the segment entirely (no preference set) keeps using the original
-    # plain `.../comfy/{key}/...` shape unchanged, so this is purely additive.
+    # shape, purely additive — `client.settings_provider_policy()` always returns a real
+    # value now (defaults to `"lowest_cost"`, never `""`), so in practice this always takes
+    # the `/{policy}` branch; the plain `.../comfy/{key}/...` shape stays supported below
+    # only for defensiveness (e.g. a future caller of this same function returning `""`),
+    # not because a real install commonly hits it.
     policy = client.settings_provider_policy()
     args.comfy_api_base = f"{_proxy_root()}/comfy/{key}/{policy}" if policy else f"{_proxy_root()}/comfy/{key}"
     logging.info(

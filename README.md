@@ -62,10 +62,19 @@ This is a single global setting, not a per-node control — none of the official
 schemas this pack relays have a host-selection input of their own to attach one to. Takes
 effect on ComfyUI's next restart (read once at pack load, same as the API key).
 
-**Known limitation**: the price/host shown in a relayed official node's own UI (its price
-badge, its `mode`/model dropdown) is still that node's original comfy.org-authored estimate —
-this pack has no way to rewrite another pack's node schema. What you're actually billed
-follows your videorouter.sh account's real pricing and the strategy above, not the number
+**Price badge**: for the 3 nodes this pack has live-verified most heavily this session —
+`Kling Text to Video`, `MiniMax Hailuo 03 Text to Video` ("MiniMax H3" option), and
+`Google Veo 3 Video Generation` — the price badge shown in the node graph is patched at
+install time to compute this platform's own real price instead of comfy.org's hardcoded
+credit estimate (see `price_patch.py`; no frontend fork required for the *number* itself to
+be correct). By default it's still shown in comfy.org's own "credits" unit, since that
+conversion is baked into the stock ComfyUI frontend — installing the optional
+[videorouter-fork ComfyUI frontend](https://github.com/Franklin-Yao/comfyui_frontend_fork)
+(built separately, launched with `--front-end-root`) instead makes these 3 badges show a
+real `$` amount directly. Every OTHER relayed node (23+ providers) still shows comfy.org's
+own original estimate — this pack has no way to rewrite another node's schema at all unless
+explicitly patched like the 3 above. What you're actually billed always follows your
+videorouter.sh account's real pricing and the routing strategy above, never the number
 displayed in the node.
 
 ## Nodes

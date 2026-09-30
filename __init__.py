@@ -1,5 +1,6 @@
-"""comfyui-videorouter — Phase 1 (image nodes only; see docs/DESIGN-comfyui-integration.md
-in the main llmrouter repo for the full design and the Phase 2/3 video-node roadmap).
+"""comfyui-videorouter — its own image-generation nodes, plus a Partner Node relay that
+redirects 20+ of ComfyUI's OFFICIAL nodes (Kling/MiniMax/Veo/Meshy/...) to bill through
+videorouter.sh instead of comfy.org (see `comfy_relay.py`, `README.md`).
 
 Registers via ComfyUI's V3 extension entrypoint (`comfy_entrypoint()` returning a
 `ComfyExtension`) rather than the legacy `NODE_CLASS_MAPPINGS` dict, matching how ComfyUI's
@@ -10,7 +11,7 @@ from __future__ import annotations
 
 from comfy_api.latest import ComfyExtension
 
-from . import comfy_relay
+from . import comfy_relay, price_patch
 from .nodes import server_routes  # noqa: F401 - side effect: registers this pack's HTTP route
 from .nodes.image import VideoRouterImageEdit, VideoRouterImageGenerate
 from .nodes.models import VideoRouterModelPicker
@@ -35,6 +36,12 @@ WEB_DIRECTORY = "./js"
 # `comfy_relay.py`'s docstring and `gateway/comfy_proxy.py` (main repo) for the mechanism.
 # Every other Partner Node is unaffected (transparently relayed to the real comfy.org).
 comfy_relay.install()
+
+# Also a side effect, not a node registration: monkey-patches the price_badge shown on a
+# few of the official nodes above (Kling/MiniMax/Veo) so the UI shows this platform's real
+# price instead of comfy.org's own hardcoded credit estimate — see `price_patch.py`'s own
+# docstring for why this works without forking the frontend, and its documented limits.
+price_patch.install()
 
 
 class VideoRouterExtension(ComfyExtension):

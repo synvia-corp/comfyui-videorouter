@@ -81,21 +81,24 @@ def settings_provider_policy() -> str:
     `comfy_relay.py::install()` at pack-load time and encoded into the redirected
     `comfy_api_base`, since that URL is the only channel available to pass anything from
     this settings file into `gateway/comfy_proxy.py` (same reasoning as the API key itself —
-    see that module's own docstring). Empty string means "no preference" (the platform's own
-    cheapest-first default), never a hard error — unlike a missing API key, an unset routing
-    preference is a legitimate, common choice, not a misconfiguration."""
+    see that module's own docstring). Defaults to `"lowest_cost"` — same value the widget
+    itself defaults to, and also the platform's own unconditional default when no policy is
+    sent at all (`docs/DESIGN-provider-routing-policies.md` §5) — so a fresh install (before
+    the settings file even exists, or before the user has ever touched this specific key)
+    behaves identically to one where the user explicitly picked "Lowest cost", never an
+    ambiguous unset state."""
     path = _settings_file_path()
     if path is None:
-        return ""
+        return "lowest_cost"
     import json as _json
 
     try:
         with open(path) as f:
             data = _json.load(f)
     except (OSError, ValueError):
-        return ""
+        return "lowest_cost"
     policy = str(data.get("VideoRouter.ProviderPolicy") or "").strip()
-    return policy if policy in _VALID_PROVIDER_POLICIES else ""
+    return policy if policy in _VALID_PROVIDER_POLICIES else "lowest_cost"
 
 
 def resolve_api_key(widget_value: Optional[str]) -> str:
