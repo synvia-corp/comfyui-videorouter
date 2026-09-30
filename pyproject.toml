@@ -1,0 +1,20 @@
+[project]
+name = "comfyui-videorouter"
+version = "0.1.0"
+description = "ComfyUI nodes for videorouter.sh — call our hosted image/video generation API (100+ models, price/failover routing) from inside a ComfyUI graph, billed to your existing llmr_sk_... key."
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = [
+    "aiohttp",
+    "pillow",
+    "numpy",
+]
+
+[project.urls]
+Repository = "https://github.com/Franklin-Yao/comfyui-videorouter"
+Homepage = "https://videorouter.sh"
+
+[tool.comfy]
+PublisherId = "videorouter"
+DisplayName = "VideoRouter"
+Icon = ""
